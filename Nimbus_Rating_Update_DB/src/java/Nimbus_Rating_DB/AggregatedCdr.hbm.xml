@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 10-Aug-2011 12:39:33 by Hibernate Tools 3.2.1.GA -->
+<hibernate-mapping>
+  <class catalog="Ormakeplus" name="Nimbus_Rating_DB.AggregatedCdr" schema="dbo" table="aggregated_cdr">
+    <id name="id" type="int">
+      <column name="ID"/>
+      <generator class="assigned"/>
+    </id>
+    <property name="userId" type="string">
+      <column length="24" name="USER_ID" not-null="true"/>
+    </property>
+    <property name="date" type="string">
+      <column length="10" name="DATE" not-null="true"/>
+    </property>
+    <property name="aggregationId" type="string">
+      <column length="99" name="AGGREGATION_ID" not-null="true"/>
+    </property>
+    <property name="retailPrice" type="double">
+      <column name="RETAIL_PRICE" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="wholesalePrice" type="double">
+      <column name="WHOLESALE_PRICE" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="remotePolo" type="double">
+      <column name="REMOTE_POLO" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="remoteRolo" type="double">
+      <column name="REMOTE_ROLO" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="localPolo" type="double">
+      <column name="LOCAL_POLO" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="localRolo" type="double">
+      <column name="LOCAL_ROLO" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="localTransit" type="double">
+      <column name="LOCAL_TRANSIT" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="remoteTransit" type="double">
+      <column name="REMOTE_TRANSIT" not-null="true" precision="53" scale="0"/>
+    </property>
+    <property name="deltaBal" type="java.lang.Double">
+      <column name="DELTA_BAL" precision="53" scale="0"/>
+    </property>
+    <property name="status" type="string">
+      <column length="9" name="STATUS" not-null="true"/>
+    </property>
+    <property name="billId" type="string">
+      <column length="30" name="BILL_ID" not-null="true"/>
+    </property>
+    <property name="financialCode" type="string">
+      <column length="24" name="FINANCIAL_CODE" not-null="true"/>
+    </property>
+    <property name="modTimestamp" type="timestamp">
+      <column length="23" name="MOD_TIMESTAMP"/>
+    </property>
+    <property name="network" type="string">
+      <column length="50" name="NETWORK"/>
+    </property>
+    <property name="currentBal" type="java.lang.Double">
+      <column name="CURRENT_BAL" precision="53" scale="0"/>
+    </property>
+    <property name="user" type="string">
+      <column length="24" name="[USER]"/>
+    </property>
+    <property name="aliasStatus" type="string">
+      <column length="25" name="ALIAS_STATUS"/>
+    </property>
+  </class>
+</hibernate-mapping>
