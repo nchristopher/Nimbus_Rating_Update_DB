@@ -116,34 +116,41 @@ public class RejectedCdrHelper {
             String BillId = "";
             int updateCountAggregation;
             int updateCountRated;
+            ArrayList<String> billIdList = new ArrayList<String>();
+            ArrayList<String> aggIdList = new ArrayList<String>();
             String splitString[] = stringToUse.split(",");
 
             org.hibernate.Transaction tx = session.beginTransaction();
-            for (int i = 0; i < splitString.length; i++) {
+            
+             for (int i = 0; i < splitString.length; i++) {
                 String split[] = splitString[i].split("\\|");
                 for (int j = 0; j < split.length; j++) {
                     if (j == 0) {
                         BillRunId = split[j];
                     } else if (j == 1) {
                         AggregationId = split[j];
+                        aggIdList.add(AggregationId);
                     } else if ( j == 2) {
                         BillId = split[j];
+                        billIdList.add(BillId);
                     }
                 }
-                updateCountAggregation = performUpdate("AggregatedCdr", AggregationId, BillId, "");
-                updateCountRated = performUpdate("RatedCdr", AggregationId, BillId, BillRunId);
-                if (updateCountAggregation > 0) {
-                    myLogger.log(Level.INFO, "Updated {0} record/s on AggregatedCDR", updateCountAggregation);
-                } else {
-                    myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
-                }
-                if (updateCountRated > 0) {
-                    myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
-                } else {
-                    myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
-                }
-
+             }
+                
+            updateCountAggregation = performUpdate("AggregatedCdr", aggIdList, billIdList, "");
+            updateCountRated = performUpdate("RatedCdr", aggIdList, billIdList, BillRunId);
+            if (updateCountAggregation > 0) {
+                myLogger.log(Level.INFO, "Updated {0} record/s on AggregatedCDR", updateCountAggregation);
+            } else {
+                myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
             }
+            if (updateCountRated > 0) {
+                myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
+            } else {
+                myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
+            }
+                      
+  
             tx.commit();
 
             return true;
@@ -168,20 +175,43 @@ public class RejectedCdrHelper {
         return returnString;
     }
 
-    private int performUpdate(String dbTable, String AggId, String BillId, String BillRunId) {
+    private int performUpdate(String dbTable, ArrayList<String> aggIdList, ArrayList<String> billIdList, String BillRunId) {
 
         String hqlUpdate = "";
-        if(dbTable.equalsIgnoreCase("aggregatedCdr")){
-            hqlUpdate = "update " + dbTable + " set billId = :BillId , status = 'B' where aggregationId = :AggregationId";
+        String AggIdString = "(";
+        
+        hqlUpdate = "update " + dbTable + " set billId = case AGGREGATION_ID ";
+            
+        Integer count = 0;
+        for(String aggId : aggIdList){
+            hqlUpdate += " when '" + aggId + "'" + " then '" + billIdList.get(count) + "'";            
+            if(count == aggIdList.size() - 1){
+                AggIdString += "'"+aggId + "')";
+            }else{
+                 AggIdString += "'"+aggId + "',";
+            }
+            count++;
+        }        
+        
+        if(dbTable.equalsIgnoreCase("aggregatedCdr")){                         
+                    
+            hqlUpdate += " end ,status = 'B'  where aggregationId IN "+AggIdString;
+            
+            //hqlUpdate = "update " + dbTable + " set billId = case when :BillId , status = 'B' where aggregationId = :AggregationId";
         }else if (dbTable.equalsIgnoreCase("ratedCdr")) {
-            hqlUpdate = "update " + dbTable + " set billId = :BillId , billStatus = 'B' , billRunId = :BillRunId where aggregationId = :AggregationId";
+                              
+            hqlUpdate += " end,billStatus = 'B' , billRunId = :BillRunId where aggregationId IN "+AggIdString;            
+            
+            //hqlUpdate = "update " + dbTable + " set billId = 'B-00027301' , billStatus = 'B' , billRunId = :BillRunId where Id = '15600343'";
         }
+        
         Query q = session.createQuery(hqlUpdate);
-        q.setString("AggregationId", AggId);
-        q.setString("BillId", BillId);
+       // q.setString("AggIdString", AggIdString);
+        //q.setString("BillId", BillId);
         if (dbTable.equalsIgnoreCase("ratedCdr")){ 
             q.setString("BillRunId", BillRunId);
         }
+        
         int executeUpdate = q.executeUpdate();
         return executeUpdate;
     }
