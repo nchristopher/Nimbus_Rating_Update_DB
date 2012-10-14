@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xs:schema version="1.0" targetNamespace="http://Nimbus_Rating_DB/" xmlns:tns="http://Nimbus_Rating_DB/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+  <xs:element name="isWebServiceRunning" nillable="true" type="tns:isWebServiceRunning"/>
+
+  <xs:element name="isWebServiceRunningResponse" nillable="true" type="tns:isWebServiceRunningResponse"/>
+
+  <xs:complexType name="isWebServiceRunning">
+    <xs:sequence/>
+  </xs:complexType>
+
+  <xs:complexType name="isWebServiceRunningResponse">
+    <xs:sequence>
+      <xs:element name="return" type="xs:boolean" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>
+

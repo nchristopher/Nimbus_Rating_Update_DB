@@ -5,7 +5,7 @@
 
 package Nimbus_Rating_DB;
 
-import com.sun.xml.fastinfoset.util.StringArray;
+
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
@@ -47,9 +47,15 @@ public class Nimbus_Rating_DB {
      * Web service operation
      */
     @WebMethod(operationName = "updateBillId")
-    public Boolean updateBillId(@WebParam(name = "mappingString") String mappingString) {
+    public void updateBillId(@WebParam(name = "mappingString") String mappingString, @WebParam(name = "aggregatedDate") String aggregatedDate, 
+                @WebParam(name = "globalRecordId") String globalRecordId, @WebParam(name = "sessionId") String sessionId, @WebParam(name = "serverURL") String serverURL) {
         //TODO write your implementation code here:
         RejectedCdrHelper rch = new RejectedCdrHelper();
-        return rch.updateBillId(mappingString);    
+        rch.updateBillId(mappingString,aggregatedDate, globalRecordId, sessionId, serverURL);    
+    }
+    
+    @WebMethod(operationName = "isWebServiceRunning")
+    public Boolean isWebServiceRunning(){
+        return true;    
     }
 }

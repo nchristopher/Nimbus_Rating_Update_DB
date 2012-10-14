@@ -66,6 +66,24 @@
     compile target as regular run target does. Again, for list of available 
     properties which you can use check the target you are overriding in 
     nbproject/build-impl.xml file. 
-
+	
     -->
+	<target name="-pre-dist">
+        <taskdef name="wsgen" classname="com.sun.tools.ws.ant.WsGen">
+            <classpath path="${javac.classpath}"/>
+        </taskdef>
+    
+        <wsgen
+            debug="true"
+            keep="true"
+            destdir="build/web/WEB-INF/classes"
+            resourcedestdir="build/web/WEB-INF/classes"
+            sei="Nimbus_Rating_DB.Nimbus_Rating_DB">
+            <classpath>
+                <pathelement path="${javac.classpath}"/>
+                <pathelement location="${java.home}/../lib/tools.jar"/>
+                <pathelement location="build/web/WEB-INF/classes"/>
+            </classpath>
+	</wsgen>
+    </target>
 </project>

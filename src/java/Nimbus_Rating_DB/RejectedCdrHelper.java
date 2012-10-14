@@ -4,12 +4,21 @@
  */
 package Nimbus_Rating_DB;
 
+import Common.src.com.Config.AppConfig;
+import Common.src.com.Config.Configurator;
+import Common.src.com.Exception.ResilientException;
+import Common.src.com.SFDC.EnterpriseSession;
+import Common.src.com.util.SalesforceUtils;
+import com.sforce.soap.partner.SoapBindingStub;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
+import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
 
 /**
@@ -44,11 +53,19 @@ public class RejectedCdrHelper {
     public static final int IDX_LINK_NUMBER = 19;
     public static final int IDX_CALLER = 20;
     public static final int IDX_SERVICE = 4;
+    private static AppConfig appConfig = null;
     //Logger
     private static Logger myLogger = Logger.getLogger(RejectedCdrHelper.class.getName());
+    private static org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(RejectedCdrHelper.class);
+    private static SalesforceUtils utils = new SalesforceUtils();
 
-    public RejectedCdrHelper() {
-        this.session = HibernateUtil.getSessionFactory().getCurrentSession();
+    public RejectedCdrHelper()  {
+        this.session = HibernateUtil.getSessionFactory().openSession();
+        try {
+            appConfig = Configurator.getAppConfig();
+        } catch (ResilientException ex) {
+            Logger.getLogger(RejectedCdrHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     public String[] getCategoryCountByType(String Type) {
@@ -108,55 +125,91 @@ public class RejectedCdrHelper {
 
     }
 
-    public boolean updateBillId(String updateString) {
+    public void updateBillId(String billRun, String aggregationDate, String globalRecordId, String sessionId, String serverURL) {
         try {
-            String stringToUse = updateString;
-            String BillRunId = "";
-            String AggregationId = "";
-            String BillId = "";
-            int updateCountAggregation;
-            int updateCountRated;
+            LOGGER.info("Entered into the function updateBillId");
+            utils.connectToSFDC(sessionId, serverURL);
+            utils.writeSFDCLog("Rating-UpdateAggregatedRecords", "Started", "RatingWS", "Started the Aggregation Process.");
+            if(!session.isOpen()){
+                session = HibernateUtil.getSessionFactory().openSession();
+            }
+            ArrayList<String> updateStringList = utils.generateupdateString(billRun, aggregationDate);
+            LOGGER.info("Number of Aggregated records queried from SFDC :"+ updateStringList.size());
+            
+            Integer batchSize = Integer.valueOf(appConfig.getBatchSize());
+            
+            LOGGER.info("Batch Size :" + batchSize );
+            utils.writeSFDCLog("Rating-UpdateAggregatedRecords", "Started", "RatingWS", "Total Number of Aggregated Records :" + updateStringList.size() + ". Batch Size :" + batchSize);
+            Integer cnt = 0;
+            Integer totalRecordsProcessed = 0;
             ArrayList<String> billIdList = new ArrayList<String>();
             ArrayList<String> aggIdList = new ArrayList<String>();
-            String splitString[] = stringToUse.split(",");
+            String updateString = "";
+            HashMap<String, String> aggSFDCIdMap = new HashMap<String,String>();
+            for(String us : updateStringList){    
+                LOGGER.info("Processing Record Number :" + totalRecordsProcessed );
+                updateString = us;
+                String stringToUse = updateString;
+                String BillRunId = "";
+                String AggregationId = "";
+                String BillId = "";
+                int updateCountAggregation;
+                int updateCountRated;
+                String splitString[] = stringToUse.split(",");
 
-            org.hibernate.Transaction tx = session.beginTransaction();
-            
-             for (int i = 0; i < splitString.length; i++) {
-                String split[] = splitString[i].split("\\|");
-                for (int j = 0; j < split.length; j++) {
-                    if (j == 0) {
-                        BillRunId = split[j];
-                    } else if (j == 1) {
-                        AggregationId = split[j];
-                        aggIdList.add(AggregationId);
-                    } else if ( j == 2) {
-                        BillId = split[j];
-                        billIdList.add(BillId);
-                    }
-                }
-             }
                 
-            updateCountAggregation = performUpdate("AggregatedCdr", aggIdList, billIdList, "");
-            updateCountRated = performUpdate("RatedCdr", aggIdList, billIdList, BillRunId);
-            if (updateCountAggregation > 0) {
-                myLogger.log(Level.INFO, "Updated {0} record/s on AggregatedCDR", updateCountAggregation);
-            } else {
-                myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
-            }
-            if (updateCountRated > 0) {
-                myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
-            } else {
-                myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
-            }
-                      
-  
-            tx.commit();
 
-            return true;
+                 for (int i = 0; i < splitString.length; i++) {
+                    String split[] = splitString[i].split("\\|");
+                    aggSFDCIdMap.put(split[1], split[3]);
+                    for (int j = 0; j < split.length; j++) {
+                        if (j == 0) {
+                            BillRunId = split[j];
+                        } else if (j == 1) {
+                            AggregationId = split[j];
+                            aggIdList.add(AggregationId);
+                        } else if ( j == 2) {
+                            BillId = split[j];
+                            billIdList.add(BillId);
+                        } 
+                    }
+                 }
+                 cnt++;
+                 totalRecordsProcessed++;
+                if(cnt != batchSize && totalRecordsProcessed < updateStringList.size()){
+                    continue;
+                }else{
+                    cnt=0;
+                    updateString = "";
+                    
+                }
+                
+                updateCountAggregation = performUpdate("AggregatedCdr", aggIdList, billIdList, "", aggSFDCIdMap);
+                updateCountRated = performUpdate("RatedCdr", aggIdList, billIdList, BillRunId, aggSFDCIdMap);
+                if (updateCountAggregation > 0) {
+                    myLogger.log(Level.INFO, "Updated {0} record/s on AggregatedCDR", updateCountAggregation);
+                } else {
+                    myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
+                }
+                if (updateCountRated > 0) {
+                    myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
+                } else {
+                    myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
+                }
+                billIdList.clear();
+                aggIdList.clear();
+                
+            }
+            //return true;
         } catch (Exception e) {
             System.out.println("Error : " + e.getMessage());
-            return false;
+            utils.writeSFDCLog("Rating-UpdateAggregatedRecords", "Error", "RatingWS", "Exception :" + e.getMessage());
+            //return false;
+        }
+         finally{
+            session.close();
+            utils.writeSFDCLog("Rating-UpdateAggregatedRecords", "Completed", "RatingWS", "Completed the processing of records.");
+            utils.updateNextStage(globalRecordId);
         }
     }
 
@@ -175,11 +228,11 @@ public class RejectedCdrHelper {
         return returnString;
     }
 
-    private int performUpdate(String dbTable, ArrayList<String> aggIdList, ArrayList<String> billIdList, String BillRunId) {
-
+    private int performUpdate(String dbTable, ArrayList<String> aggIdList, ArrayList<String> billIdList, String BillRunId, HashMap<String, String> aggSFDCMap) {
+        
         String hqlUpdate = "";
         String AggIdString = "(";
-        
+        org.hibernate.Transaction tx = session.beginTransaction();
         hqlUpdate = "update " + dbTable + " set billId = case AGGREGATION_ID ";
             
         Integer count = 0;
@@ -213,6 +266,41 @@ public class RejectedCdrHelper {
         }
         
         int executeUpdate = q.executeUpdate();
+        tx.commit();
+        LOGGER.info("Number of Records updated in " + dbTable + " table : " + executeUpdate);
+        
+        if(!dbTable.equalsIgnoreCase("ratedCdr")){
+            ArrayList<String> errorList = queryORDB(aggIdList);
+            if(errorList.size() > 0){
+                LOGGER.error("Number of Records could not be updated in " + dbTable + " table : " + errorList.size());
+                utils.updateAggregatedRecords(errorList,aggSFDCMap);
+            }
+        }
         return executeUpdate;
+    }
+    
+    private ArrayList<String> queryORDB(ArrayList<String> aggIdList){
+        
+        ArrayList<String> errorList = new ArrayList<String>();
+        
+        org.hibernate.Transaction tx = session.beginTransaction();
+        Criteria crit = session.createCriteria(AggregatedCdr.class);
+        crit.add(Restrictions.in("aggregationId", aggIdList));
+        crit.add(Restrictions.eq("status", "B"));
+        HashMap<String, String> aggCDRMap = new HashMap<String,String>();
+        List<AggregatedCdr> cdrList = (ArrayList<AggregatedCdr>) crit.list();
+        //crit.add(Restrictions.between("startTimestamp", getMinimum(dt), getMaximum(dt)));
+        for(AggregatedCdr ag : cdrList){
+            aggCDRMap.put(ag.getAggregationId(),ag.getStatus());
+            
+        }
+        
+        for(String s : aggIdList){
+            if(aggCDRMap.get(s) == null){
+                errorList.add(s);
+            }
+        }
+        
+        return errorList;
     }
 }

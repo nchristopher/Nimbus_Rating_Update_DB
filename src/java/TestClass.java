@@ -14,7 +14,7 @@ public class TestClass {
     
     public static void main(String[] args){
         Nimbus_Rating_DB db = new Nimbus_Rating_DB();
-        db.updateBillId("68|WR756733401May0|B-00027300,68|SS805536291May0|B-00027300,68|C-BTB0023May0|B-00027300,68|02080118221May0|B-00027300,68|MY5785895814May0|B-00027300");
+        db.updateBillId("28","2012-05-01","a1Gb0000000L2tl","00Db0000000HR5G!AQoAQPbGXQQLFYw4vhFi04j23oJ3HJCNt6XvWFfmeeThTjk2VLsYo5av.jXEQekfgU0BVCSBMQFRZlenZmGZ_PFH9u.kxc4.","https://eu2-api.salesforce.com/services/Soap/u/19.0/00Db0000000HR5G");
     }
     
 }
