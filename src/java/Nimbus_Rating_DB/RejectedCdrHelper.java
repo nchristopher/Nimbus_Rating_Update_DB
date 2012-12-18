@@ -10,6 +10,7 @@ import Common.src.com.Exception.ResilientException;
 import Common.src.com.SFDC.EnterpriseSession;
 import Common.src.com.util.SalesforceUtils;
 import com.sforce.soap.partner.SoapBindingStub;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +126,17 @@ public class RejectedCdrHelper {
 
     }
 
+    public static void updateBillId_Sync(String billRun, String aggregationDate, String globalRecordId, String sessionId, String serverURL){
+        try {            
+            String jobId = /*jobDateFormat.format(Calendar.getInstance()) + "_"  + */ String.valueOf(Double.valueOf(Math.random() * 10000).intValue());
+
+            Aggregation_Sync aggregationThread = new Aggregation_Sync("aggregationThread-" + jobId, billRun, aggregationDate, globalRecordId, sessionId, serverURL);
+
+            //return jobId;
+        } catch (Exception e) {
+            LOGGER.error("Exception occured while starting the new thread. Cause: " + e.getMessage());
+        }
+    }
     public void updateBillId(String billRun, String aggregationDate, String globalRecordId, String sessionId, String serverURL) {
         try {
             LOGGER.info("Entered into the function updateBillId");
@@ -209,7 +221,7 @@ public class RejectedCdrHelper {
          finally{
             session.close();
             utils.writeSFDCLog("Rating-UpdateAggregatedRecords", "Completed", "RatingWS", "Completed the processing of records.");
-            utils.updateNextStage(globalRecordId);
+            utils.updateNextStage(globalRecordId,false);
         }
     }
 
@@ -264,7 +276,7 @@ public class RejectedCdrHelper {
         if (dbTable.equalsIgnoreCase("ratedCdr")){ 
             q.setString("BillRunId", BillRunId);
         }
-        
+        LOGGER.info("Query for update = " + hqlUpdate);
         int executeUpdate = q.executeUpdate();
         tx.commit();
         LOGGER.info("Number of Records updated in " + dbTable + " table : " + executeUpdate);
@@ -302,5 +314,83 @@ public class RejectedCdrHelper {
         }
         
         return errorList;
+    }
+    
+    //Below code is to rollback open rate changes when rollback is requested in Salesforce.
+    public static void rollBackOpenRateChanges_sync(String aggregationDate, String globalRecordId, String sessionId, String serverURL){
+        try {            
+            String jobId = /*jobDateFormat.format(Calendar.getInstance()) + "_"  + */ String.valueOf(Double.valueOf(Math.random() * 10000).intValue());
+
+            RollBackOpenRate_Sync rollBackThread = new RollBackOpenRate_Sync("aggregationThread-" + jobId, aggregationDate, globalRecordId, sessionId, serverURL);
+
+            //return jobId;
+        } catch (Exception e) {
+            LOGGER.error("Exception occured while starting the new thread. Cause: " + e.getMessage());
+        }
+    }
+    
+    public void rollBackOpenRateChanges(String aggregatedDate, String globalRecordId, String sessionId, String serverURL){
+        int updateCountAggregation;
+        int updateCountRated;
+                
+        try{
+            LOGGER.info("Entered into the rollBackOpenRateChanges funtion");
+            utils.connectToSFDC(sessionId, serverURL);
+            utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Started", "RatingWS", "Started the Rollback of Aggregated/Rated changes.");
+            if(!session.isOpen()){
+                session = HibernateUtil.getSessionFactory().openSession();
+            }
+            
+            try{
+                updateCountRated = performRollback("RatedCdr",aggregatedDate);
+                if (updateCountRated > 0) {
+                    myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
+                } else {
+                    myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
+                }
+            }catch(Exception e){
+                LOGGER.error("Exception occured while Rolling back the Rated changes. Cause: " + e.getMessage());
+            }try{
+                updateCountAggregation = performRollback("AggregatedCdr", aggregatedDate);
+                if (updateCountAggregation > 0) {
+                    myLogger.log(Level.INFO, "Updated {0} record/s on AggregatedCDR", updateCountAggregation);
+                } else {
+                    myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
+                }
+                
+            }catch(Exception e){
+                LOGGER.error("Exception occured while Rolling back the Aggregated changes. Cause: " + e.getMessage());
+            }
+           
+           
+        }catch(Exception e){
+            LOGGER.error("Exception occured while Rolling back the Aggregated/Rated changes. Cause: " + e.getMessage());
+        }finally{
+            session.close();
+            utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Completed", "RatingWS", "Completed the Rollback process  of Rated/Aggregated records.");
+            utils.updateNextStage(globalRecordId, true);
+        }
+    }
+    
+     private int performRollback(String dbTable, String aggregatedDate) {
+        
+        String hqlUpdate = "";        
+        org.hibernate.Transaction tx = session.beginTransaction();
+        
+        if (dbTable.equalsIgnoreCase("ratedCdr")) {
+            hqlUpdate = "update " + dbTable + " set billId=0, billStatus='U', billRunId=null " +
+                     " where aggregationId IN (select aggregationId from AggregatedCdr where date = '"+aggregatedDate+"')";
+        }else{
+             hqlUpdate = "update " + dbTable + " set status='U', billId=0 where Date = '"+aggregatedDate+"')";
+        }        
+        
+        Query q = session.createQuery(hqlUpdate);
+       
+        LOGGER.info("Query for update = " + hqlUpdate);
+        int executeUpdate = q.executeUpdate();
+        tx.commit();
+        LOGGER.info("Number of Records updated in " + dbTable + " table : " + executeUpdate);     
+        
+        return executeUpdate;
     }
 }

@@ -71,7 +71,12 @@ public class SalesforceUtils{
         
         ArrayList<String> retList = new ArrayList<String>();
         String query = appConfig.getAggregatedRecordsQuery();
-        query += " AND Date__c = " + formatDate(aggregatedDate) + " ";
+        if(appConfig.getIsOldManagedPackage()){
+            query += " AND Espresso_Bill__Date__c = " + formatDate(aggregatedDate) + " ";
+        }else{
+            query += " AND Date__c = " + formatDate(aggregatedDate) + " ";
+        }
+        
         QuerySFDC sfdcObj = new QuerySFDC(eSession);
         HashMap<String,Object>[] resMap = sfdcObj.executeQuery(query);
         if(resMap.length == 0){
@@ -80,7 +85,12 @@ public class SalesforceUtils{
         
         for(HashMap<String,Object> hm : resMap){
             String updateString = billRun + "|";
-            updateString += hm.get("AGGREGATE_BY_VALUE__C") + "|" + hm.get("BILL__R.NAME") + "|" + hm.get("ID");
+            if(appConfig.getIsOldManagedPackage()){
+                updateString += hm.get("ESPRESSO_BILL__AGGREGATE_BY_VALUE__C") + "|" + hm.get("ESPRESSO_BILL__BILL__R.NAME") + "|" + hm.get("ID");
+            }else{
+                updateString += hm.get("AGGREGATE_BY_VALUE__C") + "|" + hm.get("BILL__R.NAME") + "|" + hm.get("ID");
+            }
+            
             retList.add(updateString);
         }
         return retList;
@@ -162,7 +172,7 @@ public class SalesforceUtils{
         }
     }
     
-    public void updateNextStage(String globalRecordId){
+    public void updateNextStage(String globalRecordId, Boolean setToIdle){
         QuerySFDC sfdcObj = new QuerySFDC(eSession);
         HashMap<String,Object>[] mapArr = new HashMap[1];
         HashMap<String,Object> aggMap = new HashMap<String,Object>();
@@ -171,10 +181,16 @@ public class SalesforceUtils{
         
         if(appConfig.getIsOldManagedPackage()){
             aggMap.put("ObjectType","Espresso_Bill__Global_Variable__c");
-            aggMap.put("Espresso_Bill__Value__c", appConfig.getNextBillStage());
+            if(setToIdle == false)
+                aggMap.put("Espresso_Bill__Value__c", appConfig.getNextBillStage());
+            else 
+                aggMap.put("Espresso_Bill__Value__c", "idle");
         }else{
             aggMap.put("ObjectType","Bill_Run__c");
-            aggMap.put("Billing_Stage__c", appConfig.getNextBillStage());
+            if(setToIdle == false)
+                aggMap.put("Billing_Stage__c", appConfig.getNextBillStage());
+            else
+                aggMap.put("Billing_Stage__c", "idle");
         }
         mapArr[0] = aggMap;
        

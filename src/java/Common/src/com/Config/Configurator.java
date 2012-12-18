@@ -79,9 +79,8 @@ public class Configurator {
                 appConfig.setAggregatedSFDCApi(props.getProperty("sfdc.aggregated.sfdc.api"));
                 appConfig.setAggregatedObjAPI(props.getProperty("sfdc.aggregatedObjApi"));
                 appConfig.setLogMPNameSpace(props.getProperty("sfdc.Log.ManagedPackage.Namespace"));
-                appConfig.setLogMPNameSpace(props.getProperty("sfdc.Log.ManagedPackage.Namespace"));
                 appConfig.setNextBillStage(props.getProperty("sfdc.nextBillStage"));
-                appConfig.setIsOldManagedPackage(props.getProperty("sfdc.Log.ManagedPackage.Namespace").equals("Yes") ? true : false);
+                appConfig.setIsOldManagedPackage(props.getProperty("sfdc.isOldManagedPackage").equals("Yes") ? true : false);
 
 
         } catch (Exception e) {

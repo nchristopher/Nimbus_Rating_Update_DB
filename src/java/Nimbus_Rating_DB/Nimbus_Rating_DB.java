@@ -50,12 +50,18 @@ public class Nimbus_Rating_DB {
     public void updateBillId(@WebParam(name = "mappingString") String mappingString, @WebParam(name = "aggregatedDate") String aggregatedDate, 
                 @WebParam(name = "globalRecordId") String globalRecordId, @WebParam(name = "sessionId") String sessionId, @WebParam(name = "serverURL") String serverURL) {
         //TODO write your implementation code here:
-        RejectedCdrHelper rch = new RejectedCdrHelper();
-        rch.updateBillId(mappingString,aggregatedDate, globalRecordId, sessionId, serverURL);    
+        
+        RejectedCdrHelper.updateBillId_Sync(mappingString,aggregatedDate, globalRecordId, sessionId, serverURL);    
     }
     
     @WebMethod(operationName = "isWebServiceRunning")
     public Boolean isWebServiceRunning(){
         return true;    
+    }
+    
+    @WebMethod(operationName = "rollBackOpenRateChanges")
+    public void rollBackOpenRateChanges(@WebParam(name = "aggregationDate") String aggregationDate,@WebParam(name = "globalRecordId") String globalRecordId, 
+                @WebParam(name = "sessionId") String sessionId, @WebParam(name = "serverURL") String serverURL){
+        RejectedCdrHelper.rollBackOpenRateChanges_sync(aggregationDate, globalRecordId, sessionId, serverURL); 
     }
 }
