@@ -60,8 +60,8 @@ public class Nimbus_Rating_DB {
     }
     
     @WebMethod(operationName = "rollBackOpenRateChanges")
-    public void rollBackOpenRateChanges(@WebParam(name = "aggregationDate") String aggregationDate,@WebParam(name = "globalRecordId") String globalRecordId, 
+    public void rollBackOpenRateChanges(@WebParam(name = "aggregatedDate") String aggregatedDate,@WebParam(name = "globalRecordId") String globalRecordId, 
                 @WebParam(name = "sessionId") String sessionId, @WebParam(name = "serverURL") String serverURL){
-        RejectedCdrHelper.rollBackOpenRateChanges_sync(aggregationDate, globalRecordId, sessionId, serverURL); 
+        RejectedCdrHelper.rollBackOpenRateChanges_sync(aggregatedDate, globalRecordId, sessionId, serverURL); 
     }
 }

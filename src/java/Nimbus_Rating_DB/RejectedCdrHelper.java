@@ -348,6 +348,7 @@ public class RejectedCdrHelper {
                 } else {
                     myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
                 }
+                utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Completed", "RatingWS", "Rolled Back " + updateCountRated+ " rated records.");
             }catch(Exception e){
                 LOGGER.error("Exception occured while Rolling back the Rated changes. Cause: " + e.getMessage());
             }try{
@@ -357,7 +358,7 @@ public class RejectedCdrHelper {
                 } else {
                     myLogger.log(Level.INFO, "No AggregationId's on Aggregated CDR to update!");
                 }
-                
+                utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Completed", "RatingWS", "Rolled Back " + updateCountAggregation+ " aggregated records.");
             }catch(Exception e){
                 LOGGER.error("Exception occured while Rolling back the Aggregated changes. Cause: " + e.getMessage());
             }
