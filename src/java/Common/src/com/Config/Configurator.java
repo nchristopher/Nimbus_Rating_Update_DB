@@ -81,6 +81,10 @@ public class Configurator {
                 appConfig.setLogMPNameSpace(props.getProperty("sfdc.Log.ManagedPackage.Namespace"));
                 appConfig.setNextBillStage(props.getProperty("sfdc.nextBillStage"));
                 appConfig.setIsOldManagedPackage(props.getProperty("sfdc.isOldManagedPackage").equals("Yes") ? true : false);
+                appConfig.setOrPort(props.getProperty("OR.Port"));
+                appConfig.setPortcommand(props.getProperty("OR.PortCommand"));
+                appConfig.setLogFile(props.getProperty("OR.LogFile"));
+                appConfig.setOrDirectory(props.getProperty("OR.Directory"));
 
 
         } catch (Exception e) {

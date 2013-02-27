@@ -28,6 +28,42 @@ public final class AppConfig {
     private String logMPNameSpace;
     private String nextBillStage;
     private Boolean isOldManagedPackage;
+    private String orPort;
+    private String portcommand;
+    private String logFile;
+    private String orDirectory;
+
+    public String getOrDirectory() {
+        return orDirectory;
+    }
+
+    public void setOrDirectory(String orDirectory) {
+        this.orDirectory = orDirectory;
+    }
+
+    public String getLogFile() {
+        return logFile;
+    }
+
+    public void setLogFile(String logFile) {
+        this.logFile = logFile;
+    }
+
+    public String getPortcommand() {
+        return portcommand;
+    }
+
+    public void setPortcommand(String portcommand) {
+        this.portcommand = portcommand;
+    }
+
+    public String getOrPort() {
+        return orPort;
+    }
+
+    public void setOrPort(String orPort) {
+        this.orPort = orPort;
+    }
 
     public Boolean getIsOldManagedPackage() {
         return isOldManagedPackage;

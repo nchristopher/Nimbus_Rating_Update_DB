@@ -64,4 +64,14 @@ public class Nimbus_Rating_DB {
                 @WebParam(name = "sessionId") String sessionId, @WebParam(name = "serverURL") String serverURL){
         RejectedCdrHelper.rollBackOpenRateChanges_sync(aggregatedDate, globalRecordId, sessionId, serverURL); 
     }
+    
+    @WebMethod(operationName = "isRatingRunning")
+    public Boolean isRatingRunning(){
+        return RejectedCdrHelper.isRatingRunning(); 
+    }
+    
+    @WebMethod(operationName = "startRating")
+    public void startRating(){
+        RejectedCdrHelper.startRating(); 
+    }
 }

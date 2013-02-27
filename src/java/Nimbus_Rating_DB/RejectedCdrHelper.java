@@ -10,6 +10,10 @@ import Common.src.com.Exception.ResilientException;
 import Common.src.com.SFDC.EnterpriseSession;
 import Common.src.com.util.SalesforceUtils;
 import com.sforce.soap.partner.SoapBindingStub;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,6 +63,14 @@ public class RejectedCdrHelper {
     private static Logger myLogger = Logger.getLogger(RejectedCdrHelper.class.getName());
     private static org.apache.log4j.Logger LOGGER = org.apache.log4j.Logger.getLogger(RejectedCdrHelper.class);
     private static SalesforceUtils utils = new SalesforceUtils();
+    
+    static{
+        try {
+            appConfig = Configurator.getAppConfig();
+        } catch (ResilientException ex) {
+            Logger.getLogger(RejectedCdrHelper.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
 
     public RejectedCdrHelper()  {
         this.session = HibernateUtil.getSessionFactory().openSession();
@@ -394,4 +406,56 @@ public class RejectedCdrHelper {
         
         return executeUpdate;
     }
+     
+     public static Boolean isRatingRunning(){
+       
+        Boolean retVal = false;
+        try 
+        {
+            String command = appConfig.getPortcommand();
+            Process p=Runtime.getRuntime().exec(command); 
+            //p.waitFor(); 
+            BufferedReader reader=new BufferedReader(new InputStreamReader(p.getInputStream())); 
+            String line=reader.readLine(); 
+            while(line!=null) 
+            { 
+                if(line.contains(appConfig.getOrPort())){
+                    retVal=true;
+                    break;
+                } 
+                line=reader.readLine();
+            } 
+            
+            if(retVal){
+                BufferedReader br = new BufferedReader(new FileReader(appConfig.getLogFile()));
+                while ((line = br.readLine()) != null) {
+                    if(line.contains("Exception")){
+                        retVal=false;
+                    }
+                }
+            }
+
+        } 
+        catch(Exception e){
+            LOGGER.info("Exception occured in  isRatingRunning. Cause " + e.getStackTrace());
+            retVal=false;
+        }
+         
+        LOGGER.info("Rating service status : " + retVal); 
+        
+        return retVal;
+     }
+     
+     public static void startRating(){
+         
+         try{
+            Runtime rt = Runtime.getRuntime();
+            rt.exec("cmd.exe /c start "+appConfig.getOrDirectory()  + "\\startup.bat");
+            LOGGER.info("Request sent for Rating. ");
+            //p.waitFor(); 
+             
+         }catch(Exception e){
+             LOGGER.error("Exception occured while starting the Open Rate. Cause " + e.getStackTrace());
+         }
+     }
 }
