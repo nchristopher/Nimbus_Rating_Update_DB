@@ -74,4 +74,10 @@ public class Nimbus_Rating_DB {
     public void startRating(){
         RejectedCdrHelper.startRating(); 
     }
+    
+    @WebMethod(operationName = "getRatingInfo")
+    public String getRatingInfo(@WebParam(name = "month") String month, @WebParam(name = "year") String year){
+        RatingHelper obj = new RatingHelper();
+        return obj.getRatingInfo(month, year); 
+    }
 }

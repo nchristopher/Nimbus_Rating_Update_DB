@@ -3,17 +3,14 @@
 <hibernate-configuration>
   <session-factory>
     <property name="hibernate.connection.driver_class">net.sourceforge.jtds.jdbc.Driver</property>
-    <property name="hibernate.connection.url">jdbc:jtds:sqlserver://ec2-54-228-133-135.eu-west-1.compute.amazonaws.com:1433;databaseName=Ormakeplus</property>
+    <property name="hibernate.connection.url">jdbc:jtds:sqlserver://ec2-54-228-133-135.eu-west-1.compute.amazonaws.com:1433;databaseName=Platform_CDRs_DB</property>
     <property name="hibernate.connection.username">SA</property>
     <property name="hibernate.connection.password">12345qwert!</property>
     <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>
     <property name="hibernate.current_session_context_class">thread</property>
     <property name="hibernate.show_sql">true</property>
     <property name="hibernate.query.factory_class">org.hibernate.hql.ast.ASTQueryTranslatorFactory</property>
-    <mapping resource="Nimbus_Rating_DB/RejectedCdr.hbm.xml"/>
-    <mapping resource="Nimbus_Rating_DB/AggregatedCdr.hbm.xml"/>
-    <mapping resource="Nimbus_Rating_DB/RatedCdr.hbm.xml"/>
-    <mapping resource="Nimbus_Rating_DB/PlatformCDR.hbm.xml"/>
-    <mapping resource="Nimbus_Rating_DB/TimeStamp.hbm.xml"/>
+    <mapping resource="Nimbus_Rating_DB/PlatformCDR.hbm.xml"/>  
+    <mapping resource="Nimbus_Rating_DB/TimeStamp.hbm.xml"/>       
   </session-factory>
 </hibernate-configuration>

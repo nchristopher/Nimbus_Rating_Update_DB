@@ -15,7 +15,7 @@ public class TestClass {
     public static void main(String[] args){
         Nimbus_Rating_DB db = new Nimbus_Rating_DB();
         //System.out.println(db.isRatingRunning());
-        db.startRating();
+        db.getRatingInfo("3", "2013");
     }
     
 }

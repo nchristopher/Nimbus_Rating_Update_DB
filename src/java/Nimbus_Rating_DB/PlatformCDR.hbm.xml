@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+  <class name="Nimbus_Rating_DB.PlatformCDR" table="Platform_CDRs" schema="dbo" catalog="Platform_CDRs_DB">
+  
+    <id name="id" type="int">
+         <column name="ID" />
+         <generator class="assigned" />
+     </id>
+     <property name="cdrGuid" type="string">
+         <column name="cdrGUID" length="99" />
+     </property>
+     <property name="dateTime" type="timestamp">
+         <column name="Datetime" length="23" not-null="true" />
+     </property>
+    </class>
+</hibernate-mapping>
