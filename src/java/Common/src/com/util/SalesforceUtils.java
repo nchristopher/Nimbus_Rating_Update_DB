@@ -180,11 +180,11 @@ public class SalesforceUtils{
         ids[0] = globalRecordId;
         
         if(appConfig.getIsOldManagedPackage()){
-            aggMap.put("ObjectType",appConfig.getLogMPNameSpace() + "Bill_Run__c");
+            aggMap.put("ObjectType","Espresso_Bill__Global_Variable__c");
             if(setToIdle == false)
-                aggMap.put(appConfig.getLogMPNameSpace() + "Billing_Stage__c", appConfig.getNextBillStage());
-            else
-                aggMap.put(appConfig.getLogMPNameSpace() + "Billing_Stage__c", "idle");
+                aggMap.put("Espresso_Bill__Value__c", appConfig.getNextBillStage());
+            else 
+                aggMap.put("Espresso_Bill__Value__c", "idle");
         }else{
             aggMap.put("ObjectType","Bill_Run__c");
             if(setToIdle == false)
