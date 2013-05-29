@@ -458,4 +458,14 @@ public class RejectedCdrHelper {
              LOGGER.error("Exception occured while starting the Open Rate. Cause " + e.getStackTrace());
          }
      }
+     
+     public static void stopRating(){
+         try{
+             Runtime rt = Runtime.getRuntime();
+             rt.exec("cmd.exe /c start "+appConfig.getOrDirectory()  + "\\shutdown.bat");
+             LOGGER.info("Request sent for stop Rating. ");
+         }catch(Exception e){
+             LOGGER.error("Exception occured while stopping the Open Rate. Cause " + e.getStackTrace());
+         }
+     }
 }

@@ -55,10 +55,10 @@ public class Configurator {
                 }catch(FileNotFoundException e){
                     try{
                         //LOGGER.info("Canonical path ====" + directory.getCanonicalPath().substring(0,directory.getCanonicalPath().lastIndexOf("\\")) + "\\webapps\\GenerateReports\\Resilient.properties");
-                        fis = new FileInputStream(directory.getCanonicalPath().substring(0,directory.getCanonicalPath().lastIndexOf("\\")) + "\\webapps\\GenerateReports\\Resilient.properties"); 
+                        fis = new FileInputStream(directory.getCanonicalPath().substring(0,directory.getCanonicalPath().lastIndexOf("\\")) + "\\webapps\\UpdateHandler\\UpdateHandler.properties"); 
                     }catch(Exception e1){
                         //LOGGER.info("Canonical path ====" + directory.getCanonicalPath()+ "\\webapps\\GenerateReports\\Resilient.properties");
-                        fis = new FileInputStream(directory.getCanonicalPath()+ "\\webapps\\GenerateReports\\Resilient.properties"); 
+                        fis = new FileInputStream(directory.getCanonicalPath()+ "\\webapps\\UpdateHandler\\UpdateHandler.properties"); 
                     }
                 }catch(Exception e){
                     fis = new FileInputStream("C:/Resilient.properties");

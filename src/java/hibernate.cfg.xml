@@ -3,7 +3,7 @@
 <hibernate-configuration>
   <session-factory>
     <property name="hibernate.connection.driver_class">net.sourceforge.jtds.jdbc.Driver</property>
-    <property name="hibernate.connection.url">jdbc:jtds:sqlserver://ec2-54-228-133-135.eu-west-1.compute.amazonaws.com:1433;databaseName=Ormakeplus</property>
+    <property name="hibernate.connection.url">jdbc:jtds:sqlserver://ec2-54-216-80-34.eu-west-1.compute.amazonaws.com:1433;databaseName=Ormakeplus</property>
     <property name="hibernate.connection.username">SA</property>
     <property name="hibernate.connection.password">12345qwert!</property>
     <property name="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</property>

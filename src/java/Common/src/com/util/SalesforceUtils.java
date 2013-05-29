@@ -72,7 +72,7 @@ public class SalesforceUtils{
         ArrayList<String> retList = new ArrayList<String>();
         String query = appConfig.getAggregatedRecordsQuery();
         if(appConfig.getIsOldManagedPackage()){
-            query += " AND Espresso_Bill__Date__c = " + formatDate(aggregatedDate) + " ";
+            query += " AND " + appConfig.getLogMPNameSpace() + "Date__c = " + formatDate(aggregatedDate) + " ";
         }else{
             query += " AND Date__c = " + formatDate(aggregatedDate) + " ";
         }
@@ -86,7 +86,7 @@ public class SalesforceUtils{
         for(HashMap<String,Object> hm : resMap){
             String updateString = billRun + "|";
             if(appConfig.getIsOldManagedPackage()){
-                updateString += hm.get("ESPRESSO_BILL__AGGREGATE_BY_VALUE__C") + "|" + hm.get("ESPRESSO_BILL__BILL__R.NAME") + "|" + hm.get("ID");
+                updateString += hm.get(appConfig.getLogMPNameSpace().toUpperCase() + "AGGREGATE_BY_VALUE__C") + "|" + hm.get(appConfig.getLogMPNameSpace().toUpperCase() + "BILL__R.NAME") + "|" + hm.get("ID");
             }else{
                 updateString += hm.get("AGGREGATE_BY_VALUE__C") + "|" + hm.get("BILL__R.NAME") + "|" + hm.get("ID");
             }
@@ -155,12 +155,12 @@ public class SalesforceUtils{
             aggMap.put("ObjectType","Log__c");
         }else{
             aggMap.put("Name", logName);
-            aggMap.put("MP_Log__Status__c", status);
-            aggMap.put("MP_Log__Type__c", type);
-            aggMap.put("MP_Log__Message__c", message);
-            aggMap.put("MP_Log__Start_Time__c",cal.getTime());
-            aggMap.put("MP_Log__End_Time__c",cal.getTime());
-            aggMap.put("ObjectType","MP_Log__Log__c");
+            aggMap.put("MP_Esp__Status__c", status);
+            aggMap.put("MP_Esp__Type__c", type);
+            aggMap.put("MP_Esp__Message__c", message);
+            aggMap.put("MP_Esp__Start_Time__c",cal.getTime());
+            aggMap.put("MP_Esp__End_Time__c",cal.getTime());
+            aggMap.put("ObjectType","MP_Esp__Log__c");
         }
         
         mapArr[0] = aggMap;
@@ -180,11 +180,11 @@ public class SalesforceUtils{
         ids[0] = globalRecordId;
         
         if(appConfig.getIsOldManagedPackage()){
-            aggMap.put("ObjectType","Espresso_Bill__Global_Variable__c");
+            aggMap.put("ObjectType",appConfig.getLogMPNameSpace() + "Bill_Run__c");
             if(setToIdle == false)
-                aggMap.put("Espresso_Bill__Value__c", appConfig.getNextBillStage());
-            else 
-                aggMap.put("Espresso_Bill__Value__c", "idle");
+                aggMap.put(appConfig.getLogMPNameSpace() + "Billing_Stage__c", appConfig.getNextBillStage());
+            else
+                aggMap.put(appConfig.getLogMPNameSpace() + "Billing_Stage__c", "idle");
         }else{
             aggMap.put("ObjectType","Bill_Run__c");
             if(setToIdle == false)
