@@ -331,7 +331,7 @@ public class RejectedCdrHelper {
     
     public void rollBackOpenRateChanges(String aggregatedDate, String globalRecordId, String sessionId, String serverURL){
         int updateCountAggregation;
-        int updateCountRated;
+        int updateCountRated = 0;
                 
         try{
             LOGGER.info("Entered into the rollBackOpenRateChanges funtion");
@@ -342,13 +342,13 @@ public class RejectedCdrHelper {
             }
             
             try{
-                updateCountRated = performRollback("RatedCdr",aggregatedDate);
+                //updateCountRated = performRollback("RatedCdr",aggregatedDate);
                 if (updateCountRated > 0) {
                     myLogger.log(Level.INFO, "Updated {0} record/s on RatedCDR", updateCountRated);
                 } else {
                     myLogger.log(Level.INFO, "No AggregationId's on RatedCDR to update!");
                 }
-                utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Completed", "RatingWS", "Rolled Back " + updateCountRated+ " rated records.");
+                //utils.writeSFDCLog("Rating-RollbackAggregatedRecords", "Completed", "RatingWS", "Rolled Back " + updateCountRated+ " rated records.");
             }catch(Exception e){
                 LOGGER.error("Exception occured while Rolling back the Rated changes. Cause: " + e.getMessage());
             }try{
